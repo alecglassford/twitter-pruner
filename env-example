@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+export C_KEY=
+export C_SECRET=
+export A_TOKEN=
+export A_TOKEN_SECRET=

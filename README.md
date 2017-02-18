@@ -33,16 +33,16 @@ To install required python libraries:
 pip install -r requirements.txt
 ```
 
-**2. Copy the example script**
+**2. Copy the example environment file**
 
 ```bash
-cp run.py.example run.py
+cp env-example .env
 ```
-You now have your own script, `run.py` (this is gitignored to keep twitter credentials from accidentally getting into version control)
+You now have your own script, `.env` (this is gitignored to keep twitter credentials from accidentally getting into version control). Note that it may not show up when you're browsing files because it's hidden (this is often the case with filenames starting with ".") but you can still edit it.
 
 **2. Add Twitter API credentials**
 
-Edit `run.py` with your twitter credentials.
+Edit `.env` with your twitter credentials. Then run `source .env` each time you restart your shell.
 
 To get twitter api credentials, go to https://apps.twitter.com/ & create a new app. Then, in the 'Keys & Access Tokens' tab, click the 'Create my access token' button. You'll need the Consumer Key, Consumer Secret, Access Token, & Access Token Secret. These credentials allow you to programmatically read & write tweets! (This means you should keep them secret)
 

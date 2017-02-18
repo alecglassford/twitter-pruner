@@ -1,7 +1,7 @@
 import tweepy
 import time
 import datetime
-
+from collections import Counter
 
 class TweetPruner:
 
@@ -17,11 +17,13 @@ class TweetPruner:
         last_id = None
         while len(self.tweet_sample)<800: # 800 is the limit
             try:
-                grabbed = self.api.home_timeline(count=200, max_id=last_id, exclude_mentions=True)
+                grabbed = self.api.home_timeline(count=200, max_id=last_id)
                 if len(grabbed)==1: # if hitting the limit
                     break
 
-                self.tweet_sample.extend(grabbed[1:]) # exclude first tweet b/c it is the same as last tweet in last bunch
+                if len(self.tweet_sample) > 0: # If sample is not empty, we have grabbed tweets already, so ...
+                    grabbed = grabbed[1:] # ... exclude first tweet b/c it is the same as last tweet in last bunch
+                self.tweet_sample.extend(grabbed)
                 print("  grabbing tweets ({} tweets so far)".format(len(self.tweet_sample)))
                 last_id = grabbed[-1].id
             except tweepy.error.RateLimitError:
@@ -31,17 +33,14 @@ class TweetPruner:
 
     def count_tweets(self, keyword=None):
 
-        user_tally = {}
+        user_tally = Counter()
 
         if not self.tweet_sample:
             self.grab_sample()
 
         for t in self.tweet_sample:
             if not keyword or keyword.lower() in t.text.lower():
-                try:
-                    user_tally[t.user.screen_name] += 1
-                except KeyError:
-                    user_tally[t.user.screen_name] = 1
+                user_tally[t.user.screen_name] += 1
 
         return user_tally
 
@@ -50,13 +49,13 @@ class TweetPruner:
 
         user_tally = self.count_tweets(keyword=keyword)
 
-        sorted_offenders = sorted(user_tally, key=user_tally.get)
+        sorted_offenders = sorted(user_tally, key=user_tally.get, reverse=True)
         if max_show and len(user_tally) > max_show:
-            worst_offenders = sorted_offenders[-max_show:]
+            worst_offenders = sorted_offenders[:max_show]
         else:
             worst_offenders = sorted_offenders
 
-        max_tweets = user_tally[worst_offenders[-1]]
+        max_tweets = user_tally[worst_offenders[0]]
         bar_unit = max(1,max_tweets/20)
 
         num_str = '{} '.format(max_show) if max_show else ''
@@ -67,12 +66,12 @@ class TweetPruner:
 
         self.pretty_tbl_print('handle', 'tweets', '')
         print('-'*45)
-        for u in reversed(worst_offenders):
+        for u in worst_offenders:
             bar_length = int(user_tally[u]/bar_unit)
             self.pretty_tbl_print('@'+u, user_tally[u], bar_length*'*')
 
 
     def pretty_tbl_print(self, col1, col2, col3):
         # col 1 length 24, col 2 len 4
-        tbl_row = "{}{}{}{}{}".format(col1, (24-len(str(col1)))*' ', col2, (4-len(str(col2)))*' ', col3)
+        tbl_row = "{:<24}{:<4}{}".format(col1, col2, col3)
         print(tbl_row)

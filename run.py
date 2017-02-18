@@ -1,11 +1,15 @@
-################################################################################
-# add your twitter credentials here
-C_KEY = ""
-C_SECRET = ""
-A_TOKEN = ""
-A_TOKEN_SECRET = ""
-################################################################################
+#!/usr/bin/env python
 
+from os import environ
+
+try:
+    C_KEY = environ['C_KEY']
+    C_SECRET = environ['C_SECRET']
+    A_TOKEN = environ['A_TOKEN']
+    A_TOKEN_SECRET = environ['A_TOKEN_SECRET']
+except KeyError:
+    print('Credentials error: You need to set your Twitter keys in .env, then run "source .env"')
+    exit(1)
 
 # here's some example usage
 if __name__ == '__main__':
